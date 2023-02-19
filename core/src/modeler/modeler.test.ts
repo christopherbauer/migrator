@@ -118,9 +118,31 @@ describe("Modeler", () => {
 		expect(actual[0].name).toBe("Chrisclass");
 		expect(actual[0].members[0]?.fieldName).toBe("id");
 		expect(actual[0].members[0]?.type).toBe("number");
+		expect(actual[0].members[0]?.nullable).toBe(false);
 		expect(actual[0].members[1]?.fieldName).toBe("name");
 		expect(actual[0].members[1]?.type).toBe("string");
+		expect(actual[0].members[1]?.nullable).toBe(true);
 		expect(actual[0].members[2]?.fieldName).toBe("deleted_at");
 		expect(actual[0].members[2]?.type).toBe("Date");
+		expect(actual[0].members[2]?.nullable).toBe(true);
+	});
+	it(`handles special types such as nullable`, () => {
+		//arrange
+		//act
+		const actual = Modeler.extract([
+			ts.createSourceFile(
+				"MockFile.ts",
+				`export class Chrisclass {
+					name?: string;
+				}`,
+				ts.ScriptTarget.ESNext
+			),
+		]);
+
+		//assert
+		expect(actual[0].name).toBe("Chrisclass");
+		expect(actual[0].members[0]?.fieldName).toBe("name");
+		expect(actual[0].members[0]?.type).toBe("string");
+		expect(actual[0].members[0]?.nullable).toBe(true);
 	});
 });

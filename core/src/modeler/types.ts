@@ -5,7 +5,7 @@ export interface MemberDefinition {
 }
 export interface ClassInfo {
 	name: string;
-	members: MemberDefinition;
+	members: MemberDefinition[];
 }
 export enum MigratorKind {
 	string = "string",

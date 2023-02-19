@@ -1,10 +1,10 @@
 export class Project {
 	id!: string;
 	name!: string;
-	codeName: string | undefined;
-	features: Feature[] | undefined;
-	resources: Person[] | undefined;
-	plannedFeatures: Feature[] | undefined;
+	codeName?: string;
+	features?: Feature[];
+	resources?: Person[];
+	plannedFeatures?: Feature[];
 	deleted: boolean;
 }
 
