@@ -1,11 +1,13 @@
+import PrimaryKey from "../core/src/modeler/decorators";
 export class Project {
+	@PrimaryKey
 	id!: string;
 	name!: string;
 	codeName?: string;
 	features?: Feature[];
 	resources?: Person[];
 	plannedFeatures?: Feature[];
-	deleted: boolean;
+	deleted?: boolean;
 }
 
 export class Feature {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import * as ts from "typescript";
 import Modeler from ".";
+import { Modifiers, TypeClass } from "./types";
 
 describe("Modeler", () => {
 	it(`returns chrisclass if it's the only class`, () => {
@@ -63,8 +64,12 @@ describe("Modeler", () => {
 
 		//assert
 		expect(actual[0].name).toBe("Chrisclass");
-		expect(actual[0].members[0]?.fieldName).toBe("related");
-		expect(actual[0].members[0]?.type).toBe("Chrissecondclass");
+		expect(actual[0].relationships[0]?.fieldName).toBe("related");
+		expect(actual[0].relationships[0]?.type).toBe("Chrissecondclass");
+		expect(actual[0].relationships[0]?.typeClass).toBe(
+			TypeClass.Relationship
+		);
+
 		expect(actual[1].name).toBe("Chrissecondclass");
 	});
 	it(`returns all attributes if there is many different types used`, () => {
@@ -87,16 +92,27 @@ describe("Modeler", () => {
 
 		//assert
 		expect(actual[0].name).toBe("Chrisclass");
-		expect(actual[0].members[0]?.fieldName).toBe("id");
-		expect(actual[0].members[0]?.type).toBe("number");
-		expect(actual[0].members[1]?.fieldName).toBe("name");
-		expect(actual[0].members[1]?.type).toBe("string");
-		expect(actual[0].members[2]?.fieldName).toBe("related");
-		expect(actual[0].members[2]?.type).toBe("Chrissecondclass");
-		expect(actual[0].members[3]?.fieldName).toBe("deleted");
-		expect(actual[0].members[3]?.type).toBe("boolean");
-		expect(actual[0].members[4]?.fieldName).toBe("deleted_at");
-		expect(actual[0].members[4]?.type).toBe("Date");
+		expect(actual[0].columns[0]?.fieldName).toBe("id");
+		expect(actual[0].columns[0]?.type).toBe("number");
+		expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
+
+		expect(actual[0].columns[1]?.fieldName).toBe("name");
+		expect(actual[0].columns[1]?.type).toBe("string");
+		expect(actual[0].columns[1]?.typeClass).toBe(TypeClass.Base);
+
+		expect(actual[0].relationships[0]?.fieldName).toBe("related");
+		expect(actual[0].relationships[0]?.type).toBe("Chrissecondclass");
+		expect(actual[0].relationships[0]?.typeClass).toBe(
+			TypeClass.Relationship
+		);
+
+		expect(actual[0].columns[2]?.fieldName).toBe("deleted");
+		expect(actual[0].columns[2]?.type).toBe("boolean");
+		expect(actual[0].columns[2]?.typeClass).toBe(TypeClass.Base);
+
+		expect(actual[0].columns[3]?.fieldName).toBe("deleted_at");
+		expect(actual[0].columns[3]?.type).toBe("Date");
+		expect(actual[0].columns[3]?.typeClass).toBe(TypeClass.Base);
 	});
 
 	it(`handles special types such as union and required types`, () => {
@@ -116,15 +132,20 @@ describe("Modeler", () => {
 
 		//assert
 		expect(actual[0].name).toBe("Chrisclass");
-		expect(actual[0].members[0]?.fieldName).toBe("id");
-		expect(actual[0].members[0]?.type).toBe("number");
-		expect(actual[0].members[0]?.nullable).toBe(false);
-		expect(actual[0].members[1]?.fieldName).toBe("name");
-		expect(actual[0].members[1]?.type).toBe("string");
-		expect(actual[0].members[1]?.nullable).toBe(true);
-		expect(actual[0].members[2]?.fieldName).toBe("deleted_at");
-		expect(actual[0].members[2]?.type).toBe("Date");
-		expect(actual[0].members[2]?.nullable).toBe(true);
+		expect(actual[0].columns[0]?.fieldName).toBe("id");
+		expect(actual[0].columns[0]?.type).toBe("number");
+		expect(actual[0].columns[0]?.nullable).toBe(false);
+		expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
+
+		expect(actual[0].columns[1]?.fieldName).toBe("name");
+		expect(actual[0].columns[1]?.type).toBe("string");
+		expect(actual[0].columns[1]?.nullable).toBe(true);
+		expect(actual[0].columns[1]?.typeClass).toBe(TypeClass.Base);
+
+		expect(actual[0].columns[2]?.fieldName).toBe("deleted_at");
+		expect(actual[0].columns[2]?.type).toBe("Date");
+		expect(actual[0].columns[2]?.nullable).toBe(true);
+		expect(actual[0].columns[2]?.typeClass).toBe(TypeClass.Base);
 	});
 	it(`handles special types such as nullable`, () => {
 		//arrange
@@ -141,8 +162,27 @@ describe("Modeler", () => {
 
 		//assert
 		expect(actual[0].name).toBe("Chrisclass");
-		expect(actual[0].members[0]?.fieldName).toBe("name");
-		expect(actual[0].members[0]?.type).toBe("string");
-		expect(actual[0].members[0]?.nullable).toBe(true);
+		expect(actual[0].columns[0]?.fieldName).toBe("name");
+		expect(actual[0].columns[0]?.type).toBe("string");
+		expect(actual[0].columns[0]?.nullable).toBe(true);
+		expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
+	});
+	it(`handles primary key decorator`, () => {
+		//arrange
+		//act
+		const actual = Modeler.extract([
+			ts.createSourceFile(
+				"MockFile.ts",
+				`import PrimaryKey from './decorators';
+				export class Chrisclass {
+					@PrimaryKey
+					id!: string;
+				}`,
+				ts.ScriptTarget.ESNext
+			),
+		]);
+
+		//assert
+		expect(actual[0].columns[0].flags?.[0]).toBe(Modifiers.PrimaryKey);
 	});
 });
