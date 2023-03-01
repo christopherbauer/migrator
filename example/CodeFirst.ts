@@ -1,6 +1,6 @@
-import PrimaryKey from "../core/src/modeler/decorators";
+import { ForeignKey, PrimaryKey } from "../core/src/modeler/decorators";
 export class Project {
-	@PrimaryKey
+	@PrimaryKey("string")
 	id!: string;
 	name!: string;
 	codeName?: string;
@@ -11,13 +11,17 @@ export class Project {
 }
 
 export class Feature {
+	@PrimaryKey("string")
 	id!: string;
+	@ForeignKey<Project>("Project", "id")
+	project_id!: string;
 	name!: string;
 	time!: number;
 	completedDate!: Date;
 }
 
 export class Person {
+	@PrimaryKey("string")
 	id!: string;
 	name!: string;
 	experience!: string;

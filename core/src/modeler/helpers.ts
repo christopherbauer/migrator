@@ -9,8 +9,18 @@ import {
 	PropertyDeclaration,
 	TypeNode,
 	Identifier,
+	isCallExpression,
+	Expression,
 } from "typescript";
-import { ColumnDefinition, DatabaseType, Modifiers, TypeClass } from "./types";
+import { getForeignKeyData } from "./decorators/ForeignKey";
+import { getPrimaryKeyData } from "./decorators/PrimaryKey";
+import {
+	ColumnDefinition,
+	DatabaseType,
+	Modifiers,
+	TypeClass,
+	KeyMetaData,
+} from "./types";
 
 export const retrievePropName = (props: PropertyDeclaration) => {
 	const { name } = props;
@@ -43,10 +53,11 @@ const isNodeUndefined = (prop: PropertyDeclaration, node: TypeNode) =>
 	typescriptSyntaxKindToDatabaseTypeMap(node.kind) ===
 		DatabaseType.undefined || prop.questionToken !== undefined;
 
-const processSingularNode: (
+const processSingularNode: <T>(
+	instance: T,
 	prop: PropertyDeclaration,
 	type: TypeNode
-) => ColumnDefinition = (prop, type) => {
+) => ColumnDefinition = (instance, prop, type) => {
 	//For dates
 	if (isTypeReferenceNode(type)) {
 		return processFromTypeReferenceNode(prop, type);
@@ -72,27 +83,90 @@ const processSingularNode: (
 			type: mapKind,
 			typeClass: TypeClass.Base,
 			nullable: isNodeUndefined(prop, type),
-			flags: getFlags(prop),
+			modifiers: extractKeys(instance, prop),
 		};
 	}
 	throw new Error("Node was not classified");
 };
-const getFlags = (prop: PropertyDeclaration) => {
+const textToModifier = (text: string) => {
+	switch (text) {
+		case "PrimaryKey":
+			return Modifiers.PrimaryKey;
+		case "ForeignKey":
+			return Modifiers.ForeignKey;
+		default:
+			throw new Error(`Modifier ${text} not found`);
+	}
+};
+const extractExpression = <T>(
+	instance: T,
+	prop: PropertyDeclaration,
+	keyData: KeyMetaData[],
+	expression: Expression
+) => {
+	if (!isIdentifier(expression)) {
+		throw new Error("Unexpected non-identifier expression");
+	}
+	const modifier = textToModifier(String(expression.escapedText));
+	switch (modifier) {
+		case Modifiers.PrimaryKey:
+			const primaryKeyData = getPrimaryKeyData(
+				instance,
+				retrievePropName(prop)
+			);
+			console.log({ primaryKeyData, pname: retrievePropName(prop) });
+			return keyData.concat({
+				modifier: modifier,
+				property: primaryKeyData.key,
+			});
+		case Modifiers.ForeignKey:
+			const foreignKeyData = getForeignKeyData(
+				instance,
+				retrievePropName(prop)
+			);
+			return keyData.concat({
+				modifier: modifier,
+				target: foreignKeyData.target,
+				property: foreignKeyData.key,
+			});
+		default:
+			throw new Error(`Modifier ${modifier} unrecognized`);
+	}
+	return keyData;
+};
+const extractKeys: <T>(
+	instance: T,
+	prop: PropertyDeclaration
+) => KeyMetaData[] = (instance, prop) => {
 	const { modifiers } = prop;
 	if (modifiers) {
 		const decorators = modifiers.filter(
 			(modifier) => modifier.kind === SyntaxKind.Decorator
 		);
-		let flags: [primary: boolean, foreign: boolean] = [false, false];
-		console.log(decorators);
-		return decorators.length > 0 ? [Modifiers.PrimaryKey] : undefined;
+		return decorators.reduce<KeyMetaData[]>((keyData, current) => {
+			if (current.kind === SyntaxKind.Decorator) {
+				let { expression } = current;
+				if (isCallExpression(expression)) {
+					expression = expression.expression;
+					return extractExpression(
+						instance,
+						prop,
+						keyData,
+						expression
+					);
+				}
+				return extractExpression(instance, prop, keyData, expression);
+			}
+			return keyData;
+		}, []);
 	}
-	return undefined;
+	return [];
 };
-export const processNode: (
+export const processNode: <T>(
+	instance: T,
 	prop: PropertyDeclaration,
 	type: TypeNode
-) => ColumnDefinition = (prop, type) => {
+) => ColumnDefinition = (instance, prop, type) => {
 	//For union types
 	if (isUnionTypeNode(type)) {
 		const { types } = type;
@@ -100,11 +174,11 @@ export const processNode: (
 		const notUndefinedType = types.find((t) => !isNodeUndefined(prop, t));
 
 		return {
-			...processSingularNode(prop, notUndefinedType!),
+			...processSingularNode(instance, prop, notUndefinedType!),
 			nullable: isNullable,
 		};
 	} else {
-		return { ...processSingularNode(prop, type) };
+		return { ...processSingularNode(instance, prop, type) };
 	}
 };
 

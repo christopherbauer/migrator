@@ -6,7 +6,6 @@
 	"scripts": {
 		"build": "tsc",
 		"build:test": "npm run build && node dist/index.js",
-		"start": "ts-node-dev index.ts --respawn",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"test:watch": "jest --watchAll"
 	},

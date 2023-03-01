@@ -1,17 +1,9 @@
-export enum TypeClass {
-	Base = "base",
-	Relationship = "relationship",
-}
-export enum Modifiers {
-	PrimaryKey,
-	ForeignKey,
-}
 export interface ColumnDefinition {
 	fieldName: string;
 	type: string;
 	typeClass: TypeClass;
 	nullable: boolean;
-	flags?: Modifiers[];
+	modifiers?: KeyMetaData[];
 }
 export interface TableInfo {
 	name: string;
@@ -24,3 +16,22 @@ export enum DatabaseType {
 	boolean = "boolean",
 	undefined = "undefined",
 }
+
+export enum TypeClass {
+	Base = "base",
+	Relationship = "relationship",
+}
+export enum Modifiers {
+	PrimaryKey,
+	ForeignKey,
+}
+export type KeyMetaData =
+	| {
+			modifier: Modifiers.PrimaryKey;
+			property: string;
+	  }
+	| {
+			modifier: Modifiers.ForeignKey;
+			target: string;
+			property: string;
+	  };

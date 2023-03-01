@@ -3,10 +3,13 @@ import {
 	isPropertyDeclaration,
 	SourceFile,
 } from "typescript";
-import { processNode } from "./helpers";
+import { processNode, retrievePropName } from "./helpers";
 import { TableInfo, ColumnDefinition, TypeClass } from "./types";
 class Modeler {
-	static extract: (files: SourceFile[]) => TableInfo[] = (files) => {
+	static extract: (
+		files: SourceFile[],
+		registeredTypes: any[]
+	) => TableInfo[] = (files, registered) => {
 		const classDeclarations = files.flatMap((file) => {
 			const classDeclarations =
 				file.statements.filter(isClassDeclaration);
@@ -17,7 +20,17 @@ class Modeler {
 					.map<ColumnDefinition | false>((prop) => {
 						const { type } = prop;
 						if (type) {
-							return processNode(prop, type);
+							console.log({
+								cname: classDeclaration.name,
+								rname: registered[0].name,
+							});
+							const target = registered.find(
+								(r) =>
+									r.name ===
+									classDeclaration.name?.escapedText
+							);
+							console.log({ registered, target });
+							return processNode(new target(), prop, type);
 						}
 						return false;
 					})

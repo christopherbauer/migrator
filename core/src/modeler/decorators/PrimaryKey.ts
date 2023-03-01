@@ -5,6 +5,12 @@ const PRIMARY_KEY_TYPE_KEY = "primary_key_type";
 type KeyType = "string" | "number" | "uuid";
 export function PrimaryKey(type?: KeyType) {
 	return function (target: any, propertyName: string) {
+		console.log("defining metadata for", {
+			target,
+			propertyName,
+			PRIMARY_KEY_KEY,
+			PRIMARY_KEY_TYPE_KEY,
+		});
 		Reflect.defineMetadata(
 			PRIMARY_KEY_KEY,
 			propertyName,
