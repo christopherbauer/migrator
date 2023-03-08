@@ -38,7 +38,7 @@ export const processFromTypeReferenceNode: (
 	if (isIdentifier(typeName)) {
 		return {
 			fieldName: retrievePropName(prop),
-			type: String(typeName.escapedText),
+			type: typescriptSyntaxKindToDatabaseTypeMap(elementType.kind),
 			typeClass: isDateType(typeName)
 				? TypeClass.Base
 				: TypeClass.Relationship,
@@ -114,7 +114,6 @@ const extractExpression = <T>(
 				instance,
 				retrievePropName(prop)
 			);
-			console.log({ primaryKeyData, pname: retrievePropName(prop) });
 			return keyData.concat({
 				modifier: modifier,
 				property: primaryKeyData.key,
@@ -132,7 +131,6 @@ const extractExpression = <T>(
 		default:
 			throw new Error(`Modifier ${modifier} unrecognized`);
 	}
-	return keyData;
 };
 const extractKeys: <T>(
 	instance: T,
@@ -192,13 +190,10 @@ export const typescriptSyntaxKindToDatabaseTypeMap = (kind: SyntaxKind) => {
 		case SyntaxKind.BooleanKeyword:
 			return DatabaseType.boolean;
 		case SyntaxKind.UndefinedKeyword:
-			return DatabaseType.undefined;
 		case SyntaxKind.TypeReference:
-			//We handle typereferences different elsewhere
-			return null;
+			return DatabaseType.undefined;
 		default:
 			//We want to know when a reference comes up with an unexpected value
-			console.error(kind);
-			return null;
+			throw new Error(`Type not found for ${kind}`);
 	}
 };

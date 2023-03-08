@@ -6,7 +6,7 @@
 	"scripts": {
 		"build": "tsc",
 		"build:test": "npm run build && node dist/index.js",
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "jest",
 		"test:watch": "jest --watchAll"
 	},
 	"author": "",

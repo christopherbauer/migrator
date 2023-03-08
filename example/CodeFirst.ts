@@ -4,9 +4,8 @@ export class Project {
 	id!: string;
 	name!: string;
 	codeName?: string;
-	features?: Feature[];
-	resources?: Person[];
-	plannedFeatures?: Feature[];
+	// features?: Feature[];
+	// resources?: Person[];
 	deleted?: boolean;
 }
 
@@ -25,4 +24,13 @@ export class Person {
 	id!: string;
 	name!: string;
 	experience!: string;
+}
+
+export class Project_Persons {
+	@PrimaryKey("string")
+	id!: string;
+	@ForeignKey<Project>("Project", "id")
+	project_id!: string;
+	@ForeignKey<Person>("Person", "id")
+	person_id!: string;
 }

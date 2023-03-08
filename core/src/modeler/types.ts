@@ -1,6 +1,6 @@
 export interface ColumnDefinition {
 	fieldName: string;
-	type: string;
+	type: DatabaseType;
 	typeClass: TypeClass;
 	nullable: boolean;
 	modifiers?: KeyMetaData[];

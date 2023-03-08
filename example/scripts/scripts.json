@@ -1,0 +1,14 @@
+{
+    "up": [
+        "CREATE TABLE Project (id VARCHAR(50) NOT NULL PRIMARY KEY, name VARCHAR(50) NOT NULL , codeName VARCHAR(50)  , deleted BOOLEAN  );",
+        "CREATE TABLE Feature (id VARCHAR(50) NOT NULL PRIMARY KEY, project_id VARCHAR(50) NOT NULL CONSTRAINT fk_Feature_Project FOREIGN KEY (project_id) REFERENCES Project (id), name VARCHAR(50) NOT NULL , time INTEGER NOT NULL , completedDate null NOT NULL );",
+        "CREATE TABLE Person (id VARCHAR(50) NOT NULL PRIMARY KEY, name VARCHAR(50) NOT NULL , experience VARCHAR(50) NOT NULL );",
+        "CREATE TABLE Project_Persons (id VARCHAR(50) NOT NULL PRIMARY KEY, project_id VARCHAR(50) NOT NULL CONSTRAINT fk_Project_Persons_Project FOREIGN KEY (project_id) REFERENCES Project (id), person_id VARCHAR(50) NOT NULL CONSTRAINT fk_Project_Persons_Person FOREIGN KEY (person_id) REFERENCES Person (id));"
+    ],
+    "down": [
+        "DROP TABLE Project;",
+        "DROP TABLE Feature;",
+        "DROP TABLE Person;",
+        "DROP TABLE Project_Persons;"
+    ]
+}

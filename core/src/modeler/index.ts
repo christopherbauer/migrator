@@ -20,16 +20,12 @@ class Modeler {
 					.map<ColumnDefinition | false>((prop) => {
 						const { type } = prop;
 						if (type) {
-							console.log({
-								cname: classDeclaration.name,
-								rname: registered[0].name,
-							});
 							const target = registered.find(
 								(r) =>
 									r.name ===
 									classDeclaration.name?.escapedText
 							);
-							console.log({ registered, target });
+							console.log(target);
 							return processNode(new target(), prop, type);
 						}
 						return false;
