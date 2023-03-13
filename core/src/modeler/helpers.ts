@@ -18,7 +18,6 @@ import {
 	ColumnDefinition,
 	DatabaseType,
 	Modifiers,
-	TypeClass,
 	KeyMetaData,
 } from "../automigrate-api/types";
 
@@ -42,7 +41,6 @@ export const processFromTypeReferenceNode: (
 			type: isDate
 				? DatabaseType.date
 				: typescriptSyntaxKindToDatabaseTypeMap(elementType.kind),
-			typeClass: isDate ? TypeClass.Base : TypeClass.Relationship,
 			nullable:
 				typescriptSyntaxKindToDatabaseTypeMap(elementType.kind) !==
 				DatabaseType.undefined,
@@ -82,7 +80,6 @@ const processSingularNode: <T>(
 		return {
 			fieldName: retrievePropName(prop),
 			type: mapKind,
-			typeClass: TypeClass.Base,
 			nullable: isNodeUndefined(prop, type),
 			modifiers: extractKeys(instance, prop),
 		};

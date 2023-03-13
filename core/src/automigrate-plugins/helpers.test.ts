@@ -1,6 +1,6 @@
 import { describe, it, expect } from "@jest/globals";
-import { TableInfo } from "../modeler";
-import { tableRelationshipSort } from "./postgres-connector";
+import { TableInfo } from "../automigrate-api/types";
+import { tableRelationshipSort } from "./helpers";
 describe("tableRelationshipSort", () => {
 	it(`reorders tables based on the relationships`, () => {
 		//arrange

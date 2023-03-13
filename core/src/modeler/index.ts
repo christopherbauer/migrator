@@ -6,7 +6,6 @@ import {
 import {
 	TableInfo,
 	ColumnDefinition,
-	TypeClass,
 	Modifiers,
 } from "../automigrate-api/types";
 import { processNode } from "./helpers";
@@ -40,16 +39,13 @@ class Modeler {
 						return false;
 					})
 					.filter(Boolean) as ColumnDefinition[];
-				const columns = members.filter(
-					(m) => m.typeClass === TypeClass.Base
-				);
 				const modFlatMap = members.flatMap((r) =>
 					r.modifiers?.flatMap(
 						(m) => m.modifier === Modifiers.ForeignKey && m.target
 					)
 				);
 				const relationships = modFlatMap.filter(Boolean) as string[];
-				return { name, columns, relationships };
+				return { name, columns: members, relationships };
 			});
 		});
 		return classDeclarations.filter((classInfo) => classInfo.name);

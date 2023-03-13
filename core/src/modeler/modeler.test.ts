@@ -1,7 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import * as ts from "typescript";
 import Modeler from ".";
-import { Modifiers, TypeClass } from "../automigrate-api/types";
+import { Modifiers } from "../automigrate-api/types";
 
 describe("Modeler", () => {
 	describe("Base cases", () => {
@@ -111,21 +111,17 @@ describe("Modeler", () => {
 			expect(actual[0].name).toBe("Chrisclass");
 			expect(actual[0].columns[0]?.fieldName).toBe("id");
 			expect(actual[0].columns[0]?.type).toBe("number");
-			expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].columns[1]?.fieldName).toBe("name");
 			expect(actual[0].columns[1]?.type).toBe("string");
-			expect(actual[0].columns[1]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].relationships[0]).toBe("Chrissecondclass");
 
 			expect(actual[0].columns[2]?.fieldName).toBe("deleted");
 			expect(actual[0].columns[2]?.type).toBe("boolean");
-			expect(actual[0].columns[2]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].columns[3]?.fieldName).toBe("deleted_at");
 			expect(actual[0].columns[3]?.type).toBe("date");
-			expect(actual[0].columns[3]?.typeClass).toBe(TypeClass.Base);
 		});
 	});
 	describe("Special Type cases", () => {
@@ -153,17 +149,14 @@ describe("Modeler", () => {
 			expect(actual[0].columns[0]?.fieldName).toBe("id");
 			expect(actual[0].columns[0]?.type).toBe("number");
 			expect(actual[0].columns[0]?.nullable).toBe(false);
-			expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].columns[1]?.fieldName).toBe("name");
 			expect(actual[0].columns[1]?.type).toBe("string");
 			expect(actual[0].columns[1]?.nullable).toBe(true);
-			expect(actual[0].columns[1]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].columns[2]?.fieldName).toBe("deleted_at");
 			expect(actual[0].columns[2]?.type).toBe("Date");
 			expect(actual[0].columns[2]?.nullable).toBe(true);
-			expect(actual[0].columns[2]?.typeClass).toBe(TypeClass.Base);
 		});
 		it(`handles special types such as nullable`, () => {
 			//arrange
@@ -187,7 +180,6 @@ describe("Modeler", () => {
 			expect(actual[0].columns[0]?.fieldName).toBe("name");
 			expect(actual[0].columns[0]?.type).toBe("string");
 			expect(actual[0].columns[0]?.nullable).toBe(true);
-			expect(actual[0].columns[0]?.typeClass).toBe(TypeClass.Base);
 		});
 	});
 	describe("Handles experimental decorators", () => {

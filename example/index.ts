@@ -3,7 +3,7 @@ import { sync } from "glob";
 import SourceExtractor from "../core/src/source-extractor";
 import Modeler from "../core/src/modeler";
 import { Project, Person, Feature, Project_Persons } from "./CodeFirst";
-import { PostgresConnector } from "../core/src/automigrate-connectors/postgres-connector";
+import { PostgresPlugin } from "../core/src/automigrate-plugins/postgres/postgres-plugin";
 const files = sync("./**/CodeFirst.ts");
 const extracted = Modeler.extract(SourceExtractor.getFilesFrom(files), [
 	Project,
@@ -21,7 +21,7 @@ mkdir("state", { recursive: true }, () => {
 });
 
 mkdir("scripts", { recursive: true }, async () => {
-	const connector = new PostgresConnector();
+	const connector = new PostgresPlugin();
 	writeFile(
 		"./scripts/scripts.json",
 		JSON.stringify(await connector.createTables(extracted), null, 4),

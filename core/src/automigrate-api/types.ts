@@ -6,10 +6,6 @@ export enum DatabaseType {
 	undefined = "undefined",
 }
 
-export enum TypeClass {
-	Base = "base",
-	Relationship = "relationship",
-}
 export enum Modifiers {
 	PrimaryKey,
 	ForeignKey,
@@ -27,7 +23,6 @@ export type KeyMetaData =
 export interface ColumnDefinition {
 	fieldName: string;
 	type: DatabaseType;
-	typeClass: TypeClass;
 	nullable: boolean;
 	modifiers?: KeyMetaData[];
 }
