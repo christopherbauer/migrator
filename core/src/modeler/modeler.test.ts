@@ -54,13 +54,17 @@ describe("Modeler", () => {
 		it(`returns 2 classes with members if there are 2 classes`, () => {
 			//arrange
 			//act
+			class Chrissecondclass {}
+			class Chrisclass {
+				related!: Chrissecondclass[];
+			}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
 						"MockFile.ts",
 						`import { Chrissecondclass } from './MockFile2';
 				export class Chrisclass {
-					related: Chrissecondclass[];
+					related!: Chrissecondclass[];
 				}`,
 						ts.ScriptTarget.ESNext
 					),
@@ -71,22 +75,20 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrissecondclass, Chrisclass]
 			);
 
 			//assert
 			expect(actual[0].name).toBe("Chrisclass");
-			expect(actual[0].relationships[0]?.fieldName).toBe("related");
-			expect(actual[0].relationships[0]?.type).toBe("Chrissecondclass");
-			expect(actual[0].relationships[0]?.typeClass).toBe(
-				TypeClass.Relationship
-			);
+			expect(actual[0].relationships[0]).toBe("Chrissecondclass");
 
 			expect(actual[1].name).toBe("Chrissecondclass");
 		});
 		it(`returns all attributes if there is many different types used`, () => {
 			//arrange
 			//act
+			class Chrissecondclass {}
+			class Chrisclass {}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
@@ -102,7 +104,7 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrissecondclass, Chrisclass]
 			);
 
 			//assert
@@ -115,18 +117,14 @@ describe("Modeler", () => {
 			expect(actual[0].columns[1]?.type).toBe("string");
 			expect(actual[0].columns[1]?.typeClass).toBe(TypeClass.Base);
 
-			expect(actual[0].relationships[0]?.fieldName).toBe("related");
-			expect(actual[0].relationships[0]?.type).toBe("Chrissecondclass");
-			expect(actual[0].relationships[0]?.typeClass).toBe(
-				TypeClass.Relationship
-			);
+			expect(actual[0].relationships[0]).toBe("Chrissecondclass");
 
 			expect(actual[0].columns[2]?.fieldName).toBe("deleted");
 			expect(actual[0].columns[2]?.type).toBe("boolean");
 			expect(actual[0].columns[2]?.typeClass).toBe(TypeClass.Base);
 
 			expect(actual[0].columns[3]?.fieldName).toBe("deleted_at");
-			expect(actual[0].columns[3]?.type).toBe("Date");
+			expect(actual[0].columns[3]?.type).toBe("date");
 			expect(actual[0].columns[3]?.typeClass).toBe(TypeClass.Base);
 		});
 	});
@@ -134,11 +132,12 @@ describe("Modeler", () => {
 		it(`handles special types such as union and required types`, () => {
 			//arrange
 			//act
+			class Chrisclass {}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
 						"MockFile.ts",
-						`export class Chrisclass {
+						`						export class Chrisclass {
 					id!: number;
 					name: string | undefined;
 					deleted_at: Date | undefined;
@@ -146,7 +145,7 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrisclass]
 			);
 
 			//assert
@@ -169,6 +168,7 @@ describe("Modeler", () => {
 		it(`handles special types such as nullable`, () => {
 			//arrange
 			//act
+			class Chrisclass {}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
@@ -179,7 +179,7 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrisclass]
 			);
 
 			//assert
@@ -194,6 +194,7 @@ describe("Modeler", () => {
 		it(`handles primary key decorator`, () => {
 			//arrange
 			//act
+			class Chrisclass {}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
@@ -206,7 +207,7 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrisclass]
 			);
 
 			//assert
@@ -217,6 +218,8 @@ describe("Modeler", () => {
 		it(`handles foreing key decorator`, () => {
 			//arrange
 			//act
+			class Chrisclass {}
+			class Chrisclass2 {}
 			const actual = Modeler.extract(
 				[
 					ts.createSourceFile(
@@ -232,7 +235,7 @@ describe("Modeler", () => {
 						ts.ScriptTarget.ESNext
 					),
 				],
-				[]
+				[Chrisclass, Chrisclass2]
 			);
 
 			//assert

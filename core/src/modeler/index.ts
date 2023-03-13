@@ -4,7 +4,7 @@ import {
 	SourceFile,
 } from "typescript";
 import { processNode, retrievePropName } from "./helpers";
-import { TableInfo, ColumnDefinition, TypeClass } from "./types";
+import { TableInfo, ColumnDefinition, TypeClass, Modifiers } from "./types";
 class Modeler {
 	static extract: (
 		files: SourceFile[],
@@ -21,12 +21,16 @@ class Modeler {
 						const { type } = prop;
 						if (type) {
 							const target = registered.find(
-								(r) =>
-									r.name ===
-									classDeclaration.name?.escapedText
+								(r) => r.name === name
 							);
-							console.log(target);
-							return processNode(new target(), prop, type);
+							try {
+								const instance = new target();
+								return processNode(instance, prop, type);
+							} catch {
+								throw new Error(
+									`Target '${name}' has no registered instance, did you forget to add it to registeredTypes?`
+								);
+							}
 						}
 						return false;
 					})
@@ -34,9 +38,12 @@ class Modeler {
 				const columns = members.filter(
 					(m) => m.typeClass === TypeClass.Base
 				);
-				const relationships = members.filter(
-					(r) => r.typeClass === TypeClass.Relationship
+				const modFlatMap = members.flatMap((r) =>
+					r.modifiers?.flatMap(
+						(m) => m.modifier === Modifiers.ForeignKey && m.target
+					)
 				);
+				const relationships = modFlatMap.filter(Boolean) as string[];
 				return { name, columns, relationships };
 			});
 		});

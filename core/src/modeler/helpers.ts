@@ -36,12 +36,13 @@ export const processFromTypeReferenceNode: (
 ) => ColumnDefinition = (prop, elementType) => {
 	const { typeName } = elementType;
 	if (isIdentifier(typeName)) {
+		const isDate = isDateType(typeName);
 		return {
 			fieldName: retrievePropName(prop),
-			type: typescriptSyntaxKindToDatabaseTypeMap(elementType.kind),
-			typeClass: isDateType(typeName)
-				? TypeClass.Base
-				: TypeClass.Relationship,
+			type: isDate
+				? DatabaseType.date
+				: typescriptSyntaxKindToDatabaseTypeMap(elementType.kind),
+			typeClass: isDate ? TypeClass.Base : TypeClass.Relationship,
 			nullable:
 				typescriptSyntaxKindToDatabaseTypeMap(elementType.kind) !==
 				DatabaseType.undefined,

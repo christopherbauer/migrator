@@ -6,6 +6,7 @@ const postgresMap: Record<DatabaseType, (size?: number) => string | null> = {
 	[DatabaseType.string]: (size: number = 50) => `VARCHAR(${size})`,
 	[DatabaseType.boolean]: () => "BOOLEAN",
 	[DatabaseType.number]: () => "INTEGER",
+	[DatabaseType.date]: () => "TIMESTAMP",
 	[DatabaseType.undefined]: () => null,
 };
 const columnMap = (tableName: string, c: ColumnDefinition) =>
@@ -27,34 +28,27 @@ const relationshipMap = (
 	sourceMember: ColumnDefinition,
 	targetName: string,
 	targetMember: string
-) =>
-	`CONSTRAINT fk_${sourceName}_${targetName} FOREIGN KEY (${sourceMember.fieldName}) REFERENCES ${targetName} (${targetMember})`;
+) => `REFERENCES ${targetName} (${targetMember})`;
 const tableCreateMapper = (t: TableInfo) =>
 	[
 		`CREATE TABLE ${t.name} (`,
 		t.columns.map((c) => columnMap(t.name, c)).join(", "),
-		t.relationships
-			.map((r) => {
-				console.log(r);
-				return r.modifiers?.flatMap((m) => {
-					console.log(m);
-					if (m.modifier === Modifiers.ForeignKey) {
-						return relationshipMap(t.name, r, m.target, m.property);
-					}
-					return null;
-				});
-			})
-			.join("."),
-		`);`,
 	].join("");
 const tableDropMapper = (t: TableInfo) => `DROP TABLE ${t.name};`;
+const NOT_FOUND = -1;
+export const tableRelationshipSort: (a: TableInfo, b: TableInfo) => number = (
+	a,
+	b
+) => {
+	return a.relationships.indexOf(b.name) === NOT_FOUND ? 1 : -1; //move b ahead of a if a is a relationship
+};
 export class PostgresConnector implements AutomigrateAPI {
 	createTables: (tables: TableInfo[]) => Promise<AutomigrateOutput> = (
 		tables
 	) => {
 		return Promise.resolve({
 			up: tables.map(tableCreateMapper),
-			down: tables.map(tableDropMapper),
+			down: tables.sort(tableRelationshipSort).map(tableDropMapper),
 		});
 	};
 

@@ -8,12 +8,13 @@ export interface ColumnDefinition {
 export interface TableInfo {
 	name: string;
 	columns: ColumnDefinition[];
-	relationships: ColumnDefinition[];
+	relationships: string[];
 }
 export enum DatabaseType {
 	string = "string",
 	number = "number",
 	boolean = "boolean",
+	date = "date",
 	undefined = "undefined",
 }
 
