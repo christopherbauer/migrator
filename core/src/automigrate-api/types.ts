@@ -1,15 +1,3 @@
-export interface ColumnDefinition {
-	fieldName: string;
-	type: DatabaseType;
-	typeClass: TypeClass;
-	nullable: boolean;
-	modifiers?: KeyMetaData[];
-}
-export interface TableInfo {
-	name: string;
-	columns: ColumnDefinition[];
-	relationships: string[];
-}
 export enum DatabaseType {
 	string = "string",
 	number = "number",
@@ -36,3 +24,15 @@ export type KeyMetaData =
 			target: string;
 			property: string;
 	  };
+export interface ColumnDefinition {
+	fieldName: string;
+	type: DatabaseType;
+	typeClass: TypeClass;
+	nullable: boolean;
+	modifiers?: KeyMetaData[];
+}
+export interface TableInfo {
+	name: string;
+	columns: ColumnDefinition[];
+	relationships: string[];
+}

@@ -3,8 +3,13 @@ import {
 	isPropertyDeclaration,
 	SourceFile,
 } from "typescript";
-import { processNode, retrievePropName } from "./helpers";
-import { TableInfo, ColumnDefinition, TypeClass, Modifiers } from "./types";
+import {
+	TableInfo,
+	ColumnDefinition,
+	TypeClass,
+	Modifiers,
+} from "../automigrate-api/types";
+import { processNode } from "./helpers";
 class Modeler {
 	static extract: (
 		files: SourceFile[],
@@ -52,4 +57,3 @@ class Modeler {
 }
 
 export default Modeler;
-export { TableInfo, ColumnDefinition, TypeClass };

@@ -20,7 +20,7 @@ import {
 	Modifiers,
 	TypeClass,
 	KeyMetaData,
-} from "./types";
+} from "../automigrate-api/types";
 
 export const retrievePropName = (props: PropertyDeclaration) => {
 	const { name } = props;

@@ -1,6 +1,10 @@
 import { AutomigrateAPI, AutomigrateOutput } from "../automigrate-api";
-import { TableInfo, ColumnDefinition } from "../modeler";
-import { DatabaseType, Modifiers } from "../modeler/types";
+import {
+	ColumnDefinition,
+	DatabaseType,
+	Modifiers,
+	TableInfo,
+} from "../automigrate-api/types";
 
 const postgresMap: Record<DatabaseType, (size?: number) => string | null> = {
 	[DatabaseType.string]: (size: number = 50) => `VARCHAR(${size})`,
@@ -9,7 +13,7 @@ const postgresMap: Record<DatabaseType, (size?: number) => string | null> = {
 	[DatabaseType.date]: () => "TIMESTAMP",
 	[DatabaseType.undefined]: () => null,
 };
-const columnMap = (tableName: string, c: ColumnDefinition) =>
+const columnMap = (c: ColumnDefinition) =>
 	[
 		c.fieldName,
 		`${postgresMap[c.type]()}`,
@@ -19,20 +23,16 @@ const columnMap = (tableName: string, c: ColumnDefinition) =>
 				case Modifiers.PrimaryKey:
 					return "PRIMARY KEY";
 				case Modifiers.ForeignKey:
-					return relationshipMap(tableName, c, m.target, m.property);
+					return relationshipMap(m.target, m.property);
 			}
 		}),
 	].join(" ");
-const relationshipMap = (
-	sourceName: string,
-	sourceMember: ColumnDefinition,
-	targetName: string,
-	targetMember: string
-) => `REFERENCES ${targetName} (${targetMember})`;
+const relationshipMap = (targetName: string, targetMember: string) =>
+	`REFERENCES ${targetName} (${targetMember})`;
 const tableCreateMapper = (t: TableInfo) =>
 	[
 		`CREATE TABLE ${t.name} (`,
-		t.columns.map((c) => columnMap(t.name, c)).join(", "),
+		t.columns.map((c) => columnMap(c)).join(", "),
 	].join("");
 const tableDropMapper = (t: TableInfo) => `DROP TABLE ${t.name};`;
 const NOT_FOUND = -1;
@@ -49,13 +49,6 @@ export class PostgresConnector implements AutomigrateAPI {
 		return Promise.resolve({
 			up: tables.map(tableCreateMapper),
 			down: tables.sort(tableRelationshipSort).map(tableDropMapper),
-		});
-	};
-
-	createTable: (table: TableInfo) => Promise<AutomigrateOutput> = (table) => {
-		return Promise.resolve({
-			up: [tableCreateMapper(table)],
-			down: [tableDropMapper(table)],
 		});
 	};
 }

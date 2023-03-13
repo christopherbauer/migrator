@@ -1,7 +1,7 @@
 import { describe, it, expect } from "@jest/globals";
 import * as ts from "typescript";
 import Modeler from ".";
-import { Modifiers, TypeClass } from "./types";
+import { Modifiers, TypeClass } from "../automigrate-api/types";
 
 describe("Modeler", () => {
 	describe("Base cases", () => {
