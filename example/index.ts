@@ -4,6 +4,7 @@ import SourceExtractor from "../core/src/source-extractor";
 import Modeler from "../core/src/modeler";
 import { Project, Person, Feature, Project_Persons } from "./CodeFirst";
 import { PostgresPlugin } from "../core/src/automigrate-plugins/postgres/postgres-plugin";
+
 const files = sync("./**/CodeFirst.ts");
 const extracted = Modeler.extract(SourceExtractor.getFilesFrom(files), [
 	Project,

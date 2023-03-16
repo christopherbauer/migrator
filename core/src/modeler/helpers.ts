@@ -21,7 +21,7 @@ import {
 	KeyMetaData,
 } from "../automigrate-api/types";
 
-export const retrievePropName = (props: PropertyDeclaration) => {
+export const getPropName = (props: PropertyDeclaration) => {
 	const { name } = props;
 	if (props && isIdentifier(name)) {
 		return String(name.escapedText);
@@ -37,7 +37,7 @@ export const processFromTypeReferenceNode: (
 	if (isIdentifier(typeName)) {
 		const isDate = isDateType(typeName);
 		return {
-			fieldName: retrievePropName(prop),
+			fieldName: getPropName(prop),
 			type: isDate
 				? DatabaseType.date
 				: typescriptSyntaxKindToDatabaseTypeMap(elementType.kind),
@@ -78,7 +78,7 @@ const processSingularNode: <T>(
 			);
 		}
 		return {
-			fieldName: retrievePropName(prop),
+			fieldName: getPropName(prop),
 			type: mapKind,
 			nullable: isNodeUndefined(prop, type),
 			modifiers: extractKeys(instance, prop),
@@ -110,7 +110,7 @@ const extractExpression = <T>(
 		case Modifiers.PrimaryKey:
 			const primaryKeyData = getPrimaryKeyData(
 				instance,
-				retrievePropName(prop)
+				getPropName(prop)
 			);
 			return keyData.concat({
 				modifier: modifier,
@@ -119,7 +119,7 @@ const extractExpression = <T>(
 		case Modifiers.ForeignKey:
 			const foreignKeyData = getForeignKeyData(
 				instance,
-				retrievePropName(prop)
+				getPropName(prop)
 			);
 			return keyData.concat({
 				modifier: modifier,
@@ -158,7 +158,7 @@ const extractKeys: <T>(
 	}
 	return [];
 };
-export const processNode: <T>(
+export const processClassProperty: <T>(
 	instance: T,
 	prop: PropertyDeclaration,
 	type: TypeNode
@@ -174,7 +174,7 @@ export const processNode: <T>(
 			nullable: isNullable,
 		};
 	} else {
-		return { ...processSingularNode(instance, prop, type) };
+		return processSingularNode(instance, prop, type);
 	}
 };
 
