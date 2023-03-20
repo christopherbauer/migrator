@@ -1,4 +1,4 @@
-import { ForeignKey, PrimaryKey } from "../core/src/modeler/decorators";
+import { ForeignKey, PrimaryKey } from "migrator";
 export class Project {
 	@PrimaryKey()
 	id!: string;

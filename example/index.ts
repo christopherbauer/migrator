@@ -1,10 +1,9 @@
-import { mkdir, writeFile, Mode } from "fs";
+import { mkdir, writeFile } from "fs";
 import { sync } from "glob";
-import SourceExtractor from "../core/src/source-extractor";
-import Modeler from "../core/src/modeler";
+import { SourceExtractor } from "migrator";
+import { Modeler } from "migrator";
 import { Project, Person, Feature, Project_Persons } from "./CodeFirst";
-import { PostgresPlugin } from "../core/src/automigrate-plugins/postgres/postgres-plugin";
-
+import { PostgresPlugin } from "migrator";
 const files = sync("./**/CodeFirst.ts");
 const extracted = Modeler.extract(SourceExtractor.getFilesFrom(files), [
 	Project,
@@ -20,7 +19,6 @@ mkdir("state", { recursive: true }, () => {
 		() => {}
 	);
 });
-
 mkdir("scripts", { recursive: true }, async () => {
 	const connector = new PostgresPlugin();
 	writeFile(

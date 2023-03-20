@@ -9,6 +9,7 @@ import {
 	PropertyDeclaration,
 	TypeNode,
 	isCallExpression,
+	Identifier,
 } from "typescript";
 import {
 	ColumnDefinition,
@@ -17,7 +18,6 @@ import {
 } from "../../automigrate-api/types";
 import {
 	extractKeyData,
-	isDateType,
 	typescriptSyntaxKindToDatabaseTypeMap,
 } from "./interpreter";
 
@@ -28,6 +28,9 @@ export const getPropName = (props: PropertyDeclaration) => {
 	}
 	throw new Error("Unexpected lack of identifier for prop");
 };
+export const isDateType = (typeName: Identifier) =>
+	typeName.escapedText === "Date";
+
 export const processFromTypeReferenceNode: (
 	prop: PropertyDeclaration,
 	elementType: TypeReferenceNode
@@ -64,10 +67,13 @@ const extractDecoratorData: <T>(
 			if (current.kind === SyntaxKind.Decorator) {
 				let { expression } = current;
 				if (isCallExpression(expression)) {
-					expression = expression.expression;
-					return extractKeyData(instance, prop, keyData, expression);
+					return keyData.concat(
+						extractKeyData(instance, prop, expression.expression)
+					);
 				}
-				return extractKeyData(instance, prop, keyData, expression);
+				return keyData.concat(
+					extractKeyData(instance, prop, expression)
+				);
 			}
 			return keyData;
 		}, []);
@@ -119,12 +125,19 @@ export const processClassProperty: <T>(
 	if (isUnionTypeNode(type)) {
 		const { types } = type;
 		const isNullable = types.some((t) => isNodeUndefined(prop, t));
-		const notUndefinedType = types.find((t) => !isNodeUndefined(prop, t));
-
-		return {
-			...processSingularNode(instance, prop, notUndefinedType!),
-			nullable: isNullable,
-		};
+		const notUndefinedType = types.filter((t) => !isNodeUndefined(prop, t));
+		if (notUndefinedType.length !== 1) {
+			throw new Error(
+				`Property '${getPropName(
+					prop
+				)}' is either only undefined or has an unrepresentable type`
+			);
+		} else {
+			return {
+				...processSingularNode(instance, prop, notUndefinedType[0]),
+				nullable: isNullable,
+			};
+		}
 	} else {
 		return processSingularNode(instance, prop, type);
 	}

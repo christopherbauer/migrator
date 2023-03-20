@@ -1,6 +1,5 @@
 import {
 	Expression,
-	Identifier,
 	isIdentifier,
 	PropertyDeclaration,
 	SyntaxKind,
@@ -14,7 +13,11 @@ import { getForeignKeyData } from "../../decorators/ForeignKey";
 import { getPrimaryKeyData } from "../../decorators/PrimaryKey";
 import { getPropName } from "../helpers";
 
-//going to remap these because they will be part of the interface for different dialects
+/**
+ * This method is used as an anti-corruption layer for Typescript's SyntaxKind
+ * @param kind SyntaxKind from typescript
+ * @returns The database type
+ */
 export const typescriptSyntaxKindToDatabaseTypeMap = (kind: SyntaxKind) => {
 	switch (kind) {
 		case SyntaxKind.StringKeyword:
@@ -31,6 +34,11 @@ export const typescriptSyntaxKindToDatabaseTypeMap = (kind: SyntaxKind) => {
 			throw new Error(`Type not found for ${kind}`);
 	}
 };
+/**
+ * Decorators are identified by the expression text, so this method converts the text of the decorator to the Modifer enum
+ * @param text The text
+ * @returns The modifier
+ */
 const textToModifier = (text: string) => {
 	switch (text) {
 		case "PrimaryKey":
@@ -41,15 +49,19 @@ const textToModifier = (text: string) => {
 			throw new Error(`Modifier ${text} not found`);
 	}
 };
-export const isDateType = (typeName: Identifier) =>
-	typeName.escapedText === "Date";
 
-export const extractKeyData = <T>(
+/**
+ * Method for extracting the data for the key based on the decorators defined in the spec
+ * @param instance An instance of the class
+ * @param prop The property that we're inspecting
+ * @param expression The typescript node expression
+ * @returns The current decorator's KeyMetaData
+ */
+export const extractKeyData: <T>(
 	instance: T,
 	prop: PropertyDeclaration,
-	keyData: KeyMetaData[],
 	expression: Expression
-) => {
+) => KeyMetaData = (instance, prop, expression) => {
 	if (!isIdentifier(expression)) {
 		throw new Error("Unexpected non-identifier expression");
 	}
@@ -60,20 +72,20 @@ export const extractKeyData = <T>(
 				instance,
 				getPropName(prop)
 			);
-			return keyData.concat({
+			return {
 				modifier: modifier,
 				property: primaryKeyData.key,
-			});
+			};
 		case Modifiers.ForeignKey:
 			const foreignKeyData = getForeignKeyData(
 				instance,
 				getPropName(prop)
 			);
-			return keyData.concat({
+			return {
 				modifier: modifier,
 				target: foreignKeyData.target,
 				property: foreignKeyData.key,
-			});
+			};
 		default:
 			throw new Error(`Modifier ${modifier} unrecognized`);
 	}
